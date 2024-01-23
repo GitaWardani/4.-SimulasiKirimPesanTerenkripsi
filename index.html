@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Messaging App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .chat-container {
+            width: 300px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: scroll;
+            height: 400px;
+        }
+        
+        .message-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .message-input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-top: 1px solid #ddd;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <ul class="message-list" id="message-list"></ul>
+        <input type="text" class="message-input" id="message-input" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const messageInput = document.getElementById("message-input");
+            const messageList = document.getElementById("message-list");
+
+            const messageContent = messageInput.value;
+            if (messageContent.trim() !== "") {
+                const response = await fetch('http://127.0.0.1:8000/send-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content: messageContent }),
+                });
+
+                const data = await response.json();
+                const encryptedMessage = data.encrypted_message;
+
+                const messageItem = document.createElement("li");
+                messageItem.className = "message-item";
+                messageItem.textContent = `You: ${messageContent} (Encrypted: ${encryptedMessage})`;
+                messageList.appendChild(messageItem);
+                messageList.scrollTop = messageList.scrollHeight; // Auto scroll to the bottom
+
+                messageInput.value = "";
+            }
+        }
+    </script>
+</body>
+</html>
